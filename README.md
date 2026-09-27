@@ -1,39 +1,88 @@
-# Ford AI — Desafio 01, Sprint 3 Mobile
+# Ford AI
 
-Aplicativo Expo/React Native para consultar fichas técnicas de concorrentes na [CarAPI](https://carapi.app/docs/) e comparar versões escolhidas com uma Ford Ranger Raptor brasileira cadastrada manualmente. A CarAPI cobre veículos vendidos **nos EUA**; neste protótipo, a busca aceita anos de **2015 a 2020** (2020 por padrão). Uma versão brasileira pode ter ficha diferente da versão americana de mesmo nome.
+O Ford AI é um aplicativo para pesquisar carros e comparar a ficha deles com a da Ford Ranger Raptor. Fizemos o projeto na Sprint 3 de Mobile da FIAP, como parte do desafio da Ford.
 
-## Rodar no VS Code
+A Ranger Raptor está cadastrada no aplicativo. Os outros carros são pesquisados na CarAPI, e a busca aceita modelos de **2015 a 2020**. Depois de escolher a versão, dá para salvar o carro e colocar os dados lado a lado.
 
-1. Instale Node.js e execute `npm ci` na pasta do projeto.
-2. Crie um arquivo `.env.local` na raiz com as duas variáveis indicadas no `.env.example` e os valores da conta CarAPI. O arquivo é ignorado pelo Git. Reinicie o Expo após editar.
-3. Execute `npm run carapi:check`: o diagnóstico testa login, busca de versões e motor sem imprimir chave ou JWT.
-4. Execute `npx expo start`. Abra o QR Code com Expo Go no Android ou pressione `w` para abrir no navegador. Pesquise, por exemplo: `Toyota` / `Camry` / versão `LE` / ano `2020`.
-5. Escolha uma versão na lista. O app obtém motor, consumo e carroceria pelo mesmo `trim_id`, converte hp para cv, lb-ft para kgfm e mpg dos EUA para km/l, e salva o carro no SQLite local. Abra **Comparar veículos** para escolher qualquer concorrente salvo e comparar com a Raptor.
 
-A tela de pesquisa também aceita atributos separados por vírgula (por exemplo, `potência, torque, suspensão`). A lista de saída segue os nomes pedidos; informações que a fonte não oferece aparecem explicitamente como indisponíveis. A ficha completa é salva para comparação independentemente do filtro de exibição.
+## Integrantes
 
-## Dados e persistência
+| Nome | RM | GitHub |
+| --- | --- | --- |
+| Eduardo da Silva Lima | RM554804 | [@Eduardo-25](https://github.com/Eduardo-25) |
+| Estevam Melo | RM555124 | [@StkStevens](https://github.com/StkStevens) |
+| Enzo Bonacasata Motta | RM555372 | [@Enzo-B-Motta](https://github.com/Enzo-B-Motta) |
+| Guilherme Ulacco | RM558418 | [@GuilhermeUcadete](https://github.com/GuilhermeUcadete) |
+| Matheus Hostim | RM556517 | [@MatheusHostim](https://github.com/MatheusHostim) |
 
-- A Ranger Raptor 2024 é inserida no banco local como referência manual. Os valores cadastrados incluem 397 cv e 59,4 kgfm; o consumo ficou sem valor confirmado.
-- As fichas dos concorrentes vêm dos endpoints `trims/v2`, `engines/v2`, `mileages/v2` e `bodies/v2`. O app não mistura versões: seleciona o ID da versão e busca as três fichas com esse ID.
-- O APK usa `expo-sqlite` para salvar concorrentes entre sessões. No navegador, usa armazenamento local como alternativa. Favoritos e histórico continuam apenas em memória.
-- Economia da CarAPI usa medição EPA; não atribua um vencedor ao comparar consumo com um dado brasileiro sem metodologia equivalente. Ausência de dado não vale zero. A CarAPI não fornece suspensão e lista detalhada de equipamentos nesses endpoints.
-- Não há modelo de ML integrado nesta tela. A comparação mostra valores e não é apresentada como inferência de IA.
+---
 
-## Erros de autenticação e rede
+## Como iniciar o projeto
 
-O login envia `api_token` e `api_secret` para `/api/auth/login` e recebe um JWT em texto. O app guarda o JWT na memória e faz novo login quando necessário; se uma consulta responder 401, renova o JWT uma vez. Um 403 pode indicar bloqueio de rede/Cloudflare ou falta de acesso ao endpoint, **não prova** que a chave expirou. 429 indica limite de requisições. A CarAPI também pode restringir recursos conforme o plano da conta.
+Você precisa ter o Node.js instalado e também ter um emulador para abrir o aplicativo android
 
-Se a consulta falhar no celular, rode `npm run carapi:check` no computador da mesma rede e anote apenas os códigos HTTP exibidos. No teste de desenvolvimento com as credenciais fornecidas pelo grupo, login, versões, motor, consumo e carroceria responderam 200 para Toyota Camry 2020; confirme novamente no ambiente da entrega.
+1. Clone o repositório e entre na pasta:
 
-**No navegador**, a CarAPI bloqueia chamadas diretas por CORS. O projeto usa a rota `/carapi` do próprio Expo Router: ela lê as credenciais do `.env.local` no servidor iniciado por `npx expo start` e encaminha somente as quatro consultas de fichas técnicas. Não é necessário abrir outro terminal nem iniciar outro servidor. Para publicar a versão web, use uma hospedagem compatível com as API Routes do Expo.
+   ```bash
+   git clone https://github.com/Enzo-B-Motta/fiap-mfi-sprint-FordApp.git
+   cd fiap-mfi-sprint-FordApp
+   ```
 
-## APK
+2. Instale as dependências:
 
-O perfil `preview` em `eas.json` gera APK: `npx eas-cli@latest build --platform android --profile preview`. O grupo precisa conectar sua conta Expo e configurar as duas variáveis `EXPO_PUBLIC_CARAPI_*` também no ambiente EAS do build, pois o `.env.local` não deve ser enviado ao repositório. Instale e teste o APK em dispositivo físico ou emulador antes de entregar. **O APK não está incluído neste ZIP.**
+   ```bash
+   npm install
+   ```
 
-## Credenciais
+3. Crie o arquivo `.env.local` na raiz do projeto com as credenciais da sua conta CarAPI:
 
-Este é um protótipo local. No navegador, o secret fica na API Route do Expo; no Expo Go/APK, variáveis `EXPO_PUBLIC_*` são embutidas no aplicativo, mesmo que `.env.local` esteja fora do Git. **Não publique o APK ou o ZIP com o secret da CarAPI.** Para publicação segura, mova também o login e as consultas do app Android para um backend que guarde o secret no servidor. Se o ZIP ou APK com credenciais for divulgado, revogue e substitua o secret.
+   ```env
+   EXPO_PUBLIC_CARAPI_TOKEN=seu_token
+   EXPO_PUBLIC_CARAPI_SECRET=seu_secret
+   ```
 
-Fontes: [Autenticação CarAPI](https://carapi.app/docs/api/auth/), [fichas técnicas CarAPI](https://carapi.app/features/json-api-specs/), [variáveis Expo](https://docs.expo.dev/guides/environment-variables/), [Ranger Raptor Ford Brasil](https://www.ford.com.br/picapes/ranger-raptor/).
+4. Inicie o Expo:
+
+   ```bash
+   npx expo start
+   ```
+
+5. Quando o menu aparecer no terminal, aperte **`a`** para abrir no emulador Android.
+
+Se quiser testar no celular, abra o **Expo Go** e escaneie o QR Code mostrado no terminal. Para abrir no navegador, aperte **`w`** com o Expo em execução. Se editar o `.env.local`, reinicie o Expo para carregar as credenciais.
+
+Se a pesquisa não funcionar, este comando testa a conexão e as credenciais da CarAPI:
+
+```bash
+npm run carapi:check
+```
+
+## O que o aplicativo faz
+
+- Pesquisa carros por marca, modelo e ano, com opção de filtrar a versão.
+- Mostra as versões encontradas para você escolher a ficha técnica certa.
+- Exibe motor, potência, torque, transmissão, tração, combustível, categoria e consumo quando a CarAPI tem esses dados.
+- Salva os carros escolhidos e compara cada um deles com a Ranger Raptor.
+- Mostra gráficos de potência e torque, além das fichas lado a lado.
+- Tem telas de favoritos e histórico, mantidos durante a sessão do aplicativo.
+
+## Tecnologias utilizadas
+
+| Tecnologia | Uso no projeto |
+| --- | --- |
+| [React Native](https://reactnative.dev/) e [Expo](https://expo.dev/) | Aplicativo mobile |
+| [Expo Router](https://docs.expo.dev/router/introduction/) | Navegação entre as telas |
+| TypeScript | Código do aplicativo |
+| [CarAPI](https://carapi.app/docs/) | Consulta das fichas técnicas |
+| [Expo SQLite](https://docs.expo.dev/versions/latest/sdk/sqlite/) | Carros salvos no Android |
+| [AsyncStorage](https://react-native-async-storage.github.io/async-storage/) | Carros salvos na versão web |
+
+## Sobre os dados
+
+A **Ford Ranger Raptor** foi cadastrada manualmente como referência, por isso ela aparece na comparação mesmo sendo de fora do intervalo de 2015 a 2020. Os carros pesquisados vêm da CarAPI, que reúne versões vendidas nos Estados Unidos. Uma versão americana pode ter especificações diferentes da mesma versão vendida no Brasil.
+
+Para mostrar os dados na mesma unidade, o aplicativo converte potência de hp para cv, torque de lb-ft para kgfm e consumo de mpg para km/l. Se a API não informar algum dado, o campo aparece como indisponível. Suspensão e lista detalhada de equipamentos, por exemplo, não vêm nas fichas consultadas.
+
+Os carros usados na comparação ficam salvos localmente: SQLite no aplicativo mobile e AsyncStorage no navegador. Existe uma configuração de Supabase no código, mas a comparação ainda usa os carros salvos no dispositivo. O aplicativo mostra os dados para comparar; não há um modelo de IA fazendo previsões nesta versão.
+
+O `.env.local` é ignorado pelo Git. Não coloque o token nem o secret no README ou em commits. Para publicar uma versão mobile, o secret precisa ficar em um servidor, já que variáveis `EXPO_PUBLIC_*` entram no aplicativo.
