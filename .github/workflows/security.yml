@@ -1,0 +1,19 @@
+name: Ford AI - Security Pipeline
+
+on:
+  push:
+    branches:
+      - master
+      - cybersecurity
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  security:
+    name: Security Checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar código do repositório
+        uses: actions/checkout@v4
