@@ -1,5 +1,14 @@
 const ALLOWED_RESOURCES = new Set(["trims", "engines", "mileages", "bodies"]);
 
+const ALLOWED_PARAMS = new Set([
+  "make",
+  "model",
+  "year",
+  "trim_id",
+  "page",
+  "limit",
+]);
+
 let cachedJwt = "";
 let jwtUntil = 0;
 let loginPending: Promise<string> | null = null;
@@ -58,6 +67,13 @@ export async function GET(request: Request) {
   if (!ALLOWED_RESOURCES.has(resource)) return error("Consulta da CarAPI inválida.", 400);
 
   incoming.searchParams.delete("resource");
+
+  for (const key of incoming.searchParams.keys()) {
+  if (!ALLOWED_PARAMS.has(key)) {
+    return error(`Parâmetro não permitido: ${key}.`, 400);
+  }
+}
+
   const url = `https://carapi.app/api/${resource}/v2?${incoming.searchParams.toString()}`;
   try {
     const response = await upstream(url);
