@@ -70,7 +70,14 @@ export async function GET(request: Request) {
 
   for (const key of incoming.searchParams.keys()) {
   if (!ALLOWED_PARAMS.has(key)) {
-    return error(`Parâmetro não permitido: ${key}.`, 400);
+  console.warn(JSON.stringify({
+    event: "security_input_rejected",
+    parameter: key,
+    status: 400,
+    timestamp: new Date().toISOString(),
+  }));
+
+  return error(`Parâmetro não permitido: ${key}.`, 400);
   }
 }
 
@@ -82,6 +89,12 @@ export async function GET(request: Request) {
         response.status === 403 ? "Acesso bloqueado pela CarAPI (403)." :
         response.status === 429 ? "Limite da CarAPI atingido (429)." :
         `CarAPI respondeu HTTP ${response.status}.`;
+      console.warn(JSON.stringify({
+        event: "carapi_request_failed",
+        resource,
+        status: response.status,
+        timestamp: new Date().toISOString(),
+  }));
       return error(message, response.status);
     }
     return new Response(await response.text(), {
